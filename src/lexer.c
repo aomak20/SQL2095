@@ -68,6 +68,15 @@ TokenArray lexer_tokenize(const char* data, size_t len) {
         char c = scanner_peek(&scanner);
 
         switch (c) {
+            // Skip whitespace
+            case ' ':
+            case '\t':
+            case '\v':
+            case '\n':
+            case '\r':
+            case '\f':
+                scanner_advance(&scanner);
+                break;
             // Single-character tokens which can't be scanned further
             case '(':
                 lexer_append_token_array_arg(&scanner.tokens,
