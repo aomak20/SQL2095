@@ -2,6 +2,7 @@
 // Author:      Andrei M
 // Description: TODO
 
+#include <stdbool.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -196,6 +197,42 @@ static void process_id_keyword(Scanner* s) {
 static void process_number(Scanner* s) {
     // TODO process to get a int or float literal token
     const char* temp = s->data + s->pos;    // Start of token pointer
+    size_t line = s->line;
+    size_t col = s->column;
+    size_t len = 0;                         // Track length of number
+    bool found_period = false;
+    TokenType type = TOKEN_TYPE_INT_LITERAL;
+
+    while (true) {
+        char next_char = scanner_peek(s);
+        if (isdigit(next_char)) {
+            scanner_advance(s);
+            len++;
+        } else if (next_char == '.') {
+            if (found_period) {
+                // TODO handle error, multiple periods in number
+                scanner_advance(s);
+                len++;
+            } else {
+                found_period = true;
+                type = TOKEN_TYPE_FLOAT_LITERAL;
+                scanner_advance(s);
+                len++;
+            }
+        } else {
+            // TODO could put a check here to make sure number is followed by
+            // whitespace, not sure if that's what I wanna do yet
+            break;
+        }
+    }
+
+    // Make sure float didn't end with a period
+    if (temp[len-1] == '.') {
+        // TODO handle error for float ending with '.'
+    }
+
+    lexer_append_token_array_arg(&s->tokens, type,
+        temp, len, line, col);
 }
 
 
