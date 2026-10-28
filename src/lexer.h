@@ -67,9 +67,7 @@ typedef enum TokenType {
     FOREACH_TOKEN_TYPE(ENUM_GEN)
 } TokenType;
 
-const char* TOKEN_TYPE_STR[] = {
-    FOREACH_TOKEN_TYPE(STRING_GEN)
-};
+extern const char* TOKEN_TYPE_STR[];
 
 // Individual token
 typedef struct {

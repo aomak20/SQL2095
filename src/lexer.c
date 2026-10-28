@@ -7,6 +7,9 @@
 #include "lexer.h"
 
 // Constants
+const char* TOKEN_TYPE_STR[] = {
+    FOREACH_TOKEN_TYPE(STRING_GEN)
+};
 const size_t INIT_TOKARR_CAP = 64; // start capacity for a TokenArray
 
 // Scanner struct to keep track of state, pass between functions
@@ -29,7 +32,7 @@ static char scanner_peek(const Scanner* s) {
     return (s->pos < s->len ? s->data[s->pos] : '\0');
 }
 
-static void advance(Scanner* s) {
+static void scanner_advance(Scanner* s) {
     if (s->pos >= s->len) return;
 
     // Handle lines
@@ -41,6 +44,22 @@ static void advance(Scanner* s) {
     }
 
     s->pos++;
+}
+
+// Append a new token to scanner's TokenArray, growing if needed
+static void scanner_append_token(Scanner* s, TokenType type,
+    const char* start, size_t length, size_t line, size_t column
+) {
+    lexer_grow_token_array(&s->tokens);
+    Token token = {
+        .type = type,
+        .start = start,
+        .length = length,
+        .line = line,
+        .column = column
+    };
+    s->tokens.start[s->tokens.count] = token;
+    s->tokens.count++;
 }
 
 // TODO add helper functions to tokenize identifiers, numbers, etc.
@@ -60,12 +79,64 @@ TokenArray lexer_tokenize(const char* data, size_t len) {
         .tokens = tokens
     };
 
-    // TODO implement lexer, main loop of scanning input, creating tokens, and
-    // appending tokens to `tokens.start`. also malloc/realloc `.start` if need
     // Main scanner loop
     while (scanner.pos < scanner.len) {
-        // TODO figure out the scanning DFA, switch statements based on current char
-        // Delegate to helper function as soon as possible, there it can do all the Token and TokenArray handling
+        char c = scanner_peek(&scanner);
+
+        switch (c) {
+            // Single-character tokens which can't be scanned further
+            case '(':
+                scanner_append_token(&scanner, TOKEN_TYPE_LPAREN,
+                    scanner.data + scanner.pos, 1,
+                    scanner.line, scanner.column);
+                scanner_advance(&scanner);
+                break;
+            case ')':
+                scanner_append_token(&scanner, TOKEN_TYPE_RPAREN,
+                    scanner.data + scanner.pos, 1,
+                    scanner.line, scanner.column);
+                scanner_advance(&scanner);
+                break;
+            case ',':
+                scanner_append_token(&scanner, TOKEN_TYPE_COMMA,
+                    scanner.data + scanner.pos, 1,
+                    scanner.line, scanner.column);
+                scanner_advance(&scanner);
+                break;
+            case ';':
+                scanner_append_token(&scanner, TOKEN_TYPE_SEMICOLON,
+                    scanner.data + scanner.pos, 1,
+                    scanner.line, scanner.column);
+                scanner_advance(&scanner);
+                break;
+            case '*':
+                scanner_append_token(&scanner, TOKEN_TYPE_STAR,
+                    scanner.data + scanner.pos, 1,
+                    scanner.line, scanner.column);
+                scanner_advance(&scanner);
+                break;
+            case '+':
+                scanner_append_token(&scanner, TOKEN_TYPE_PLUS,
+                    scanner.data + scanner.pos, 1,
+                    scanner.line, scanner.column);
+                scanner_advance(&scanner);
+                break;
+            case '-':
+                scanner_append_token(&scanner, TOKEN_TYPE_MINUS,
+                    scanner.data + scanner.pos, 1,
+                    scanner.line, scanner.column);
+                scanner_advance(&scanner);
+                break;
+            case '/':
+                scanner_append_token(&scanner, TOKEN_TYPE_SLASH,
+                    scanner.data + scanner.pos, 1,
+                    scanner.line, scanner.column);
+                scanner_advance(&scanner);
+                break;
+            default:
+                // TODO handle unrecognized characters and generate error
+                scanner_advance(&scanner);
+        }
     }
 
     return scanner.tokens;
