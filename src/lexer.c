@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "lexer.h"
 
 // Constants
@@ -12,6 +13,40 @@ const char* TOKEN_TYPE_STR[] = {
     FOREACH_TOKEN_TYPE(STRING_GEN)
 };
 const size_t INIT_TOKARR_CAP = 64; // start capacity for a TokenArray
+
+// Keywords array to match const char* to token type
+typedef struct {
+    const char *keyword;
+    TokenType type;
+} Keyword;
+
+static const Keyword keywords[] = {
+    {"CREATE",  TOKEN_TYPE_CREATE},
+    {"DROP",    TOKEN_TYPE_DROP},
+    {"TABLE",   TOKEN_TYPE_TABLE},
+    {"SELECT",  TOKEN_TYPE_SELECT},
+    {"INSERT",  TOKEN_TYPE_INSERT},
+    {"INTO",    TOKEN_TYPE_INTO},
+    {"VALUES",  TOKEN_TYPE_VALUES},
+    {"UPDATE",  TOKEN_TYPE_UPDATE},
+    {"SET",     TOKEN_TYPE_SET},
+    {"DELETE",  TOKEN_TYPE_DELETE},
+    {"FROM",    TOKEN_TYPE_FROM},
+    {"WHERE",   TOKEN_TYPE_WHERE},
+    {"PRIMARY", TOKEN_TYPE_PRIMARY},
+    {"KEY",     TOKEN_TYPE_KEY},
+    {"NOT",     TOKEN_TYPE_NOT},
+    {"NULL",    TOKEN_TYPE_NULL},
+    {"INT",     TOKEN_TYPE_INT_TYPE},
+    {"FLOAT",   TOKEN_TYPE_FLOAT_TYPE},
+    {"CHAR",    TOKEN_TYPE_CHAR_TYPE},
+    {"VARCHAR", TOKEN_TYPE_VARCHAR_TYPE},
+    {"BOOL",    TOKEN_TYPE_BOOL_TYPE},
+    {"TRUE",    TOKEN_TYPE_TRUE},
+    {"FALSE",   TOKEN_TYPE_FALSE},
+    {"AND",     TOKEN_TYPE_AND},
+    {"OR",      TOKEN_TYPE_OR}
+};
 
 // Scanner struct to keep track of state, pass between functions
 typedef struct Scanner {
@@ -28,6 +63,18 @@ typedef struct Scanner {
 
 
 // Helper functions
+
+// Check if string matches a keyword, case-insensitive, and returns either the
+// corresponding keyword or identifier token type
+static TokenType check_keyword_match(const char* data, size_t len) {
+    for (size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); ++i) {
+        if (strlen(keywords[i].keyword) == len &&
+            strncasecmp(data, keywords[i].keyword, len) == 0) {
+            return keywords[i].type;
+        }
+    }
+    return TOKEN_TYPE_IDENTIFIER;
+}
 
 // Get current character from scanner
 static char scanner_peek(const Scanner* s) {
@@ -82,7 +129,7 @@ static void process_right_arrow(Scanner* s) {
     size_t line = s->line;
     size_t col = s->column;
     scanner_advance(s);
-    
+
     char next_char = scanner_peek(s);
     switch (next_char) {
         case '=':   // >=
@@ -126,9 +173,23 @@ static void process_quoted_string(Scanner* s) {
 
 // Process a letter with scanner
 static void process_id_keyword(Scanner* s) {
-    // TODO process to get an identifier, then match with keywords case-insens
-    // to see if it's a keyword, otherwise it's an identifier token
     const char* temp = s->data + s->pos;    // Start of token pointer
+    size_t line = s->line;
+    size_t col = s->column;
+    size_t len = 0;                         // Track length of id/keyword
+
+    while (!isspace(scanner_peek(s))) {
+        // TODO currently this allows any non-whitespace char in an identifier,
+        // figure this out later and add check & error handling if needed
+        scanner_advance(s);
+        len++;
+    }
+
+    // Determine if this token matches a keyword (case-insensitive), otherwise
+    // it's an identifier
+    TokenType type = check_keyword_match(temp, len);
+    lexer_append_token_array_arg(&s->tokens, type,
+        temp, len, line, col);
 }
 
 // Process a digit with scanner
