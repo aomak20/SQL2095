@@ -78,10 +78,12 @@ typedef struct {
 } Token;
 
 // Dynamically allocated token array, gets returned by main tokenize function.
-// `start` is a pointer to heap allocation, `count` is number of tokens.
+// `start` is a pointer to heap allocation, `count` is number of tokens,
+// `capacity` is max number of tokens.
 typedef struct {
     Token* start;
     size_t count;
+    size_t capacity;
 } TokenArray;
 
 ////
@@ -93,6 +95,16 @@ typedef struct {
 // NOTE: Remember to free the TokenArray after you're done with it using
 // `lexer_free_token_array`.
 TokenArray lexer_tokenize(const char* data, size_t len);
+
+////
+// TokenArray helpers
+////
+
+// Create an empty TokenArray.
+TokenArray lexer_new_token_array();
+
+// Check count of a TokenArray and grow if needed.
+void lexer_grow_token_array(TokenArray* arr);
 
 // Free the heap allocation under a TokenArray.
 void lexer_free_token_array(TokenArray* arr);
