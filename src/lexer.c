@@ -2,6 +2,7 @@
 // Author:      Andrei M
 // Description: TODO
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "lexer.h"
@@ -28,10 +29,12 @@ typedef struct Scanner {
 
 // Helper functions
 
+// Get current character from scanner
 static char scanner_peek(const Scanner* s) {
     return (s->pos < s->len ? s->data[s->pos] : '\0');
 }
 
+// Advance one character in scanner
 static void scanner_advance(Scanner* s) {
     if (s->pos >= s->len) return;
 
@@ -46,7 +49,31 @@ static void scanner_advance(Scanner* s) {
     s->pos++;
 }
 
-// TODO add helper functions to tokenize identifiers, numbers, etc.
+// Process a '<' with scanner
+static void process_left_arrow(Scanner* s) {
+    // TODO process < to get either <> or < or <= token
+}
+
+// Process a '>' with scanner
+static void process_right_arrow(Scanner* s) {
+    // TODO process > to get either > or >= token
+}
+
+// Process a '"' with scanner
+static void process_quoted_string(Scanner* s) {
+    // TODO process quoted string until see another "
+}
+
+// Process a letter with scanner
+static void process_id_keyword(Scanner* s) {
+    // TODO process to get an identifier, then match with keywords case-insens
+    // to see if it's a keyword, otherwise it's an identifier token
+}
+
+// Process a digit with scanner
+static void process_number(Scanner* s) {
+    // TODO process to get a int or float literal token
+}
 
 
 // Lexer API
@@ -126,10 +153,30 @@ TokenArray lexer_tokenize(const char* data, size_t len) {
                     scanner.line, scanner.column);
                 scanner_advance(&scanner);
                 break;
-            //TODO implement the rest of the cases
-            default:
-                // TODO handle unrecognized characters and generate error
+            case '=':
+                lexer_append_token_array_arg(&scanner.tokens,
+                    TOKEN_TYPE_EQ, scanner.data + scanner.pos, 1,
+                    scanner.line, scanner.column);
                 scanner_advance(&scanner);
+                break;
+            case '<':
+                process_left_arrow(&scanner);
+                break;
+            case '>':
+                process_right_arrow(&scanner);
+                break;
+            case '"':
+                process_quoted_string(&scanner);
+                break;
+            default:
+                if (isalpha(c)) {
+                    process_id_keyword(&scanner);
+                } else if (isdigit(c)) {
+                    process_number(&scanner);
+                } else {
+                    // TODO unrecognized character, error handle it
+                    scanner_advance(&scanner);
+                }
         }
     }
 
