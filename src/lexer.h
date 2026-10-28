@@ -112,4 +112,10 @@ void lexer_grow_token_array(TokenArray* arr);
 // Free the heap allocation under a TokenArray.
 void lexer_free_token_array(TokenArray* arr);
 
+// Print a Token struct's info.
+void lexer_print_token(const Token* token);
+
+// Print each Token in a TokenArray.
+void lexer_print_token_array(const TokenArray* arr);
+
 #endif//LEXER_H

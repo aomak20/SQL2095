@@ -2,6 +2,7 @@
 // Author:      Andrei M
 // Description: TODO
 
+#include <stdio.h>
 #include <stdlib.h>
 #include "lexer.h"
 
@@ -47,4 +48,19 @@ void lexer_free_token_array(TokenArray* arr) {
     free(arr->start);
     arr->start = NULL;
     arr->count = 0;
+}
+
+void lexer_print_token(const Token* token) {
+    printf("Type: %s\n", TOKEN_TYPE_STR[token->type]);
+    printf("Data: \"%.*s\"\n", (int)token->length, token->start);
+    printf("Line, column: %zu, %zu\n", token->line, token->column);
+}
+
+void lexer_print_token_array(const TokenArray* arr) {
+    printf("Token count: %zu\n\n", arr->count);
+    for (size_t i = 0; i < arr->count; ++i) {
+        printf("%zu\n", i);
+        lexer_print_token(&arr->start[i]);
+        printf("\n");
+    }
 }
