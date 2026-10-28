@@ -9,22 +9,71 @@
 // Constants
 const size_t INIT_TOKARR_CAP = 64; // start capacity for a TokenArray
 
+// Scanner struct to keep track of state, pass between functions
+typedef struct Scanner {
+    // Source input
+    const char* data;
+    size_t len;
+    // Current position
+    size_t pos;
+    size_t line;
+    size_t column;
+    // TokenArray
+    TokenArray tokens;
+} Scanner;
+
+
+// Helper functions
+
+static char scanner_peek(const Scanner* s) {
+    return (s->pos < s->len ? s->data[s->pos] : '\0');
+}
+
+static void advance(Scanner* s) {
+    if (s->pos >= s->len) return;
+
+    // Handle lines
+    if (scanner_peek(s) == '\n') {
+        s->line++;
+        s->column = 1;
+    } else {
+        s->column++;
+    }
+
+    s->pos++;
+}
+
+// TODO add helper functions to tokenize identifiers, numbers, etc.
+
+
 // Lexer API
+
 TokenArray lexer_tokenize(const char* data, size_t len) {
-    // Initialize scanner state, TokenArray
-    size_t pos = 0;
-    size_t line = 1;
-    size_t col = 1;
-    
+    // Initialize scanner state
     TokenArray tokens = lexer_new_token_array();
+    Scanner scanner = {
+        .data = data,
+        .len = len,
+        .pos = 0,
+        .line = 1,
+        .column = 1,
+        .tokens = tokens
+    };
 
     // TODO implement lexer, main loop of scanning input, creating tokens, and
     // appending tokens to `tokens.start`. also malloc/realloc `.start` if need
+    // Main scanner loop
+    while (scanner.pos < scanner.len) {
+        // TODO figure out the scanning DFA, switch statements based on current char
+        // Delegate to helper function as soon as possible, there it can do all the Token and TokenArray handling
+    }
 
-    return tokens;
+    return scanner.tokens;
 }
 
+
 // TokenArray helpers
+
 TokenArray lexer_new_token_array() {
     TokenArray tokens = {
         .start = NULL,
