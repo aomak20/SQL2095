@@ -51,28 +51,90 @@ static void scanner_advance(Scanner* s) {
 
 // Process a '<' with scanner
 static void process_left_arrow(Scanner* s) {
-    // TODO process < to get either <> or < or <= token
+    const char* temp = s->data + s->pos;    // Start of token pointer
+    size_t line = s->line;
+    size_t col = s->column;
+    scanner_advance(s);
+
+    char next_char = scanner_peek(s);
+    switch (next_char) {
+        case '>':   // <>
+            lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_NE,
+                temp, 2, line, col);
+            scanner_advance(s);
+            break;
+        case '=':   // <=
+            lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_LTE,
+                temp, 2, line, col);
+            scanner_advance(s);
+            break;
+        default:    // <
+            lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_LT,
+                temp, 1, line, col);
+            scanner_advance(s);
+    }
 }
 
 // Process a '>' with scanner
 static void process_right_arrow(Scanner* s) {
     // TODO process > to get either > or >= token
+    const char* temp = s->data + s->pos;    // Start of token pointer
+    size_t line = s->line;
+    size_t col = s->column;
+    scanner_advance(s);
+    
+    char next_char = scanner_peek(s);
+    switch (next_char) {
+        case '=':   // >=
+            lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_GTE,
+                temp, 2, line, col);
+            scanner_advance(s);
+            break;
+        default:    // >
+            lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_GT,
+                temp, 1, line, col);
+            scanner_advance(s);
+    }
 }
 
 // Process a '"' with scanner
 static void process_quoted_string(Scanner* s) {
-    // TODO process quoted string until see another "
+    // Line and column will point to start of string, including double quotes,
+    // but the actual token will just store the string itself without quotes.
+    size_t line = s->line;
+    size_t col = s->column;
+    scanner_advance(s);                     // Skip the double quote
+    const char* temp = s->data + s->pos;    // Start of token pointer
+    size_t len = 0;                         // Track length of quoted string
+
+    while (scanner_peek(s) != '"') {
+        if (isalnum(scanner_peek(s))) {
+            scanner_advance(s);
+            len++;
+        } else {
+            // TODO handle a non-alphanumeric or EOF inside string literal.
+            // This is an arbitrary restriction, figure out what I want to do
+            // about it later.
+            scanner_advance(s);
+            len++;
+        }
+    }
+    lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_STRING_LITERAL,
+        temp, len, line, col);
+    scanner_advance(s);
 }
 
 // Process a letter with scanner
 static void process_id_keyword(Scanner* s) {
     // TODO process to get an identifier, then match with keywords case-insens
     // to see if it's a keyword, otherwise it's an identifier token
+    const char* temp = s->data + s->pos;    // Start of token pointer
 }
 
 // Process a digit with scanner
 static void process_number(Scanner* s) {
     // TODO process to get a int or float literal token
+    const char* temp = s->data + s->pos;    // Start of token pointer
 }
 
 
