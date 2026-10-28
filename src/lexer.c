@@ -46,22 +46,6 @@ static void scanner_advance(Scanner* s) {
     s->pos++;
 }
 
-// Append a new token to scanner's TokenArray, growing if needed
-static void scanner_append_token(Scanner* s, TokenType type,
-    const char* start, size_t length, size_t line, size_t column
-) {
-    lexer_grow_token_array(&s->tokens);
-    Token token = {
-        .type = type,
-        .start = start,
-        .length = length,
-        .line = line,
-        .column = column
-    };
-    s->tokens.start[s->tokens.count] = token;
-    s->tokens.count++;
-}
-
 // TODO add helper functions to tokenize identifiers, numbers, etc.
 
 
@@ -86,53 +70,54 @@ TokenArray lexer_tokenize(const char* data, size_t len) {
         switch (c) {
             // Single-character tokens which can't be scanned further
             case '(':
-                scanner_append_token(&scanner, TOKEN_TYPE_LPAREN,
-                    scanner.data + scanner.pos, 1,
+                lexer_append_token_array_arg(&scanner.tokens,
+                    TOKEN_TYPE_LPAREN, scanner.data + scanner.pos, 1,
                     scanner.line, scanner.column);
                 scanner_advance(&scanner);
                 break;
             case ')':
-                scanner_append_token(&scanner, TOKEN_TYPE_RPAREN,
-                    scanner.data + scanner.pos, 1,
+                lexer_append_token_array_arg(&scanner.tokens,
+                    TOKEN_TYPE_RPAREN, scanner.data + scanner.pos, 1,
                     scanner.line, scanner.column);
                 scanner_advance(&scanner);
                 break;
             case ',':
-                scanner_append_token(&scanner, TOKEN_TYPE_COMMA,
-                    scanner.data + scanner.pos, 1,
+                lexer_append_token_array_arg(&scanner.tokens,
+                    TOKEN_TYPE_COMMA, scanner.data + scanner.pos, 1,
                     scanner.line, scanner.column);
                 scanner_advance(&scanner);
                 break;
             case ';':
-                scanner_append_token(&scanner, TOKEN_TYPE_SEMICOLON,
-                    scanner.data + scanner.pos, 1,
+                lexer_append_token_array_arg(&scanner.tokens,
+                    TOKEN_TYPE_SEMICOLON, scanner.data + scanner.pos, 1,
                     scanner.line, scanner.column);
                 scanner_advance(&scanner);
                 break;
             case '*':
-                scanner_append_token(&scanner, TOKEN_TYPE_STAR,
-                    scanner.data + scanner.pos, 1,
+                lexer_append_token_array_arg(&scanner.tokens,
+                    TOKEN_TYPE_STAR, scanner.data + scanner.pos, 1,
                     scanner.line, scanner.column);
                 scanner_advance(&scanner);
                 break;
             case '+':
-                scanner_append_token(&scanner, TOKEN_TYPE_PLUS,
-                    scanner.data + scanner.pos, 1,
+                lexer_append_token_array_arg(&scanner.tokens,
+                    TOKEN_TYPE_PLUS, scanner.data + scanner.pos, 1,
                     scanner.line, scanner.column);
                 scanner_advance(&scanner);
                 break;
             case '-':
-                scanner_append_token(&scanner, TOKEN_TYPE_MINUS,
-                    scanner.data + scanner.pos, 1,
+                lexer_append_token_array_arg(&scanner.tokens,
+                    TOKEN_TYPE_MINUS, scanner.data + scanner.pos, 1,
                     scanner.line, scanner.column);
                 scanner_advance(&scanner);
                 break;
             case '/':
-                scanner_append_token(&scanner, TOKEN_TYPE_SLASH,
-                    scanner.data + scanner.pos, 1,
+                lexer_append_token_array_arg(&scanner.tokens,
+                    TOKEN_TYPE_SLASH, scanner.data + scanner.pos, 1,
                     scanner.line, scanner.column);
                 scanner_advance(&scanner);
                 break;
+            //TODO implement the rest of the cases
             default:
                 // TODO handle unrecognized characters and generate error
                 scanner_advance(&scanner);
@@ -168,6 +153,27 @@ void lexer_free_token_array(TokenArray* arr) {
     free(arr->start);
     arr->start = NULL;
     arr->count = 0;
+}
+
+void lexer_append_token_array_tok(TokenArray* arr, const Token token) {
+    lexer_grow_token_array(arr);
+    arr->start[arr->count] = token;
+    arr->count++;
+}
+
+void lexer_append_token_array_arg(TokenArray* arr, TokenType type,
+    const char* start, size_t length, size_t line, size_t column
+) {
+    lexer_grow_token_array(arr);
+    Token token = {
+        .type = type,
+        .start = start,
+        .length = length,
+        .line = line,
+        .column = column
+    };
+    arr->start[arr->count] = token;
+    arr->count++;
 }
 
 void lexer_print_token(const Token* token) {

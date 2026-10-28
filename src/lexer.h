@@ -110,6 +110,12 @@ void lexer_grow_token_array(TokenArray* arr);
 // Free the heap allocation under a TokenArray.
 void lexer_free_token_array(TokenArray* arr);
 
+// Append a Token to a TokenArray, growing if needed.
+void lexer_append_token_array_tok(TokenArray* arr, const Token token);
+// Append a new Token to a TokenArray based on given args, growing if needed.
+void lexer_append_token_array_arg(TokenArray* arr, TokenType type,
+    const char* start, size_t length, size_t line, size_t column);
+
 // Print a Token struct's info.
 void lexer_print_token(const Token* token);
 
