@@ -10,6 +10,8 @@
 ////
 // Token definitions
 ////
+
+// Token types
 typedef enum {
     // Statements
     TOK_CREATE,
@@ -66,6 +68,7 @@ typedef enum {
     TOK_ERROR
 } TokenType;
 
+// Individual token
 typedef struct {
     TokenType type;
     const char *start;  // Points at source in-mem
@@ -73,5 +76,25 @@ typedef struct {
     size_t line;
     size_t column;
 } Token;
+
+// Dynamically allocated token array, gets returned by main tokenize function.
+// `start` is a pointer to heap allocation, `count` is number of tokens.
+typedef struct {
+    Token* start;
+    size_t count;
+} TokenArray;
+
+////
+// Lexer API
+////
+
+// Main tokenize function. Reads input from memory, returns a TokenArray, which
+// points to a heap allocated array of Token structs.
+// NOTE: Remember to free the TokenArray after you're done with it using
+// `lexer_free_token_array`.
+TokenArray lexer_tokenize(const char* data, size_t len);
+
+// Free the heap allocation under a TokenArray.
+void lexer_free_token_array(TokenArray* arr);
 
 #endif//LEXER_H
