@@ -11,62 +11,65 @@
 // Token definitions
 ////
 
-// Token types
-typedef enum {
-    // Statements
-    TOK_CREATE,
-    TOK_DROP,
-    TOK_TABLE,
-    TOK_SELECT,
-    TOK_INSERT,
-    TOK_INTO,
-    TOK_VALUES,
-    TOK_UPDATE,
-    TOK_SET,
-    TOK_DELETE,
-    TOK_FROM,
-    TOK_WHERE,
-    // Constraints
-    TOK_PRIMARY,
-    TOK_KEY,
-    TOK_NOT,
-    TOK_NULL,
-    // Data types
-    TOK_INT_TYPE,
-    TOK_FLOAT_TYPE,
-    TOK_CHAR_TYPE,
-    TOK_VARCHAR_TYPE,
-    TOK_BOOL_TYPE,
-    // Boolean/logic
-    TOK_TRUE,
-    TOK_FALSE,
-    TOK_AND,
-    TOK_OR,
-    // Literals
-    TOK_IDENTIFIER,     // table_name
-    TOK_INT_LITERAL,    // 74
-    TOK_FLOAT_LITERAL,  // 1.23
-    TOK_STRING_LITERAL, // 'example'
-    // Operators
-    TOK_EQ,             // =
-    TOK_NE,             // <>
-    TOK_LT,             // <
-    TOK_LTE,            // <=
-    TOK_GT,             // >
-    TOK_GTE,            // >=
-    // Symbols/punctuation
-    TOK_LPAREN,         // (
-    TOK_RPAREN,         // )
-    TOK_COMMA,          // ,
-    TOK_SEMICOLON,      // ;
-    TOK_STAR,           // *
-    TOK_PLUS,           // +
-    TOK_MINUS,          // -
-    TOK_SLASH,          // /
-    // Other/special
-    TOK_EOF,
-    TOK_ERROR
+// Macros to generate both TokenType enum and const strings from one list
+#define ENUM_GEN(ENUM) ENUM,
+#define STRING_GEN(STRING) #STRING,
+
+#define FOREACH_TOKEN_TYPE(TOKEN_TYPE) \
+    TOKEN_TYPE(TOKEN_TYPE_CREATE) \
+    TOKEN_TYPE(TOKEN_TYPE_DROP) \
+    TOKEN_TYPE(TOKEN_TYPE_TABLE) \
+    TOKEN_TYPE(TOKEN_TYPE_SELECT) \
+    TOKEN_TYPE(TOKEN_TYPE_INSERT) \
+    TOKEN_TYPE(TOKEN_TYPE_INTO) \
+    TOKEN_TYPE(TOKEN_TYPE_VALUES) \
+    TOKEN_TYPE(TOKEN_TYPE_UPDATE) \
+    TOKEN_TYPE(TOKEN_TYPE_SET) \
+    TOKEN_TYPE(TOKEN_TYPE_DELETE) \
+    TOKEN_TYPE(TOKEN_TYPE_FROM) \
+    TOKEN_TYPE(TOKEN_TYPE_WHERE) \
+    TOKEN_TYPE(TOKEN_TYPE_PRIMARY) \
+    TOKEN_TYPE(TOKEN_TYPE_KEY) \
+    TOKEN_TYPE(TOKEN_TYPE_NOT) \
+    TOKEN_TYPE(TOKEN_TYPE_NULL) \
+    TOKEN_TYPE(TOKEN_TYPE_INT_TYPE) \
+    TOKEN_TYPE(TOKEN_TYPE_FLOAT_TYPE) \
+    TOKEN_TYPE(TOKEN_TYPE_CHAR_TYPE) \
+    TOKEN_TYPE(TOKEN_TYPE_VARCHAR_TYPE) \
+    TOKEN_TYPE(TOKEN_TYPE_BOOL_TYPE) \
+    TOKEN_TYPE(TOKEN_TYPE_TRUE) \
+    TOKEN_TYPE(TOKEN_TYPE_FALSE) \
+    TOKEN_TYPE(TOKEN_TYPE_AND) \
+    TOKEN_TYPE(TOKEN_TYPE_OR) \
+    TOKEN_TYPE(TOKEN_TYPE_IDENTIFIER) \
+    TOKEN_TYPE(TOKEN_TYPE_INT_LITERAL) \
+    TOKEN_TYPE(TOKEN_TYPE_FLOAT_LITERAL) \
+    TOKEN_TYPE(TOKEN_TYPE_STRING_LITERAL) \
+    TOKEN_TYPE(TOKEN_TYPE_EQ) \
+    TOKEN_TYPE(TOKEN_TYPE_NE) \
+    TOKEN_TYPE(TOKEN_TYPE_LT) \
+    TOKEN_TYPE(TOKEN_TYPE_LTE) \
+    TOKEN_TYPE(TOKEN_TYPE_GT) \
+    TOKEN_TYPE(TOKEN_TYPE_GTE) \
+    TOKEN_TYPE(TOKEN_TYPE_LPAREN) \
+    TOKEN_TYPE(TOKEN_TYPE_RPAREN) \
+    TOKEN_TYPE(TOKEN_TYPE_COMMA) \
+    TOKEN_TYPE(TOKEN_TYPE_SEMICOLON) \
+    TOKEN_TYPE(TOKEN_TYPE_STAR) \
+    TOKEN_TYPE(TOKEN_TYPE_PLUS) \
+    TOKEN_TYPE(TOKEN_TYPE_MINUS) \
+    TOKEN_TYPE(TOKEN_TYPE_SLASH) \
+    TOKEN_TYPE(TOKEN_TYPE_EOF) \
+    TOKEN_TYPE(TOKEN_TYPE_ERROR) \
+    TOKEN_TYPE(TOKEN_TYPE_MAX)
+
+typedef enum TokenType {
+    FOREACH_TOKEN_TYPE(ENUM_GEN)
 } TokenType;
+
+const char* TOKEN_TYPE_STR[] = {
+    FOREACH_TOKEN_TYPE(STRING_GEN)
+};
 
 // Individual token
 typedef struct {
