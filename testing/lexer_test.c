@@ -7,11 +7,6 @@
 #include "lexer.h"
 #include "sql_error.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
-
 static char *read_all_input(FILE* stream, size_t* out_len)
 {
     size_t len = 0;
@@ -44,8 +39,7 @@ static char *read_all_input(FILE* stream, size_t* out_len)
     return buffer;
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     if (argc > 2) {
         fprintf(stderr, "Usage: lexer_test\n");
         fprintf(stderr, "       lexer_test (filename)\n");
