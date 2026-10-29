@@ -36,6 +36,10 @@ typedef struct SqlError {
 
 // Useful macros
 #define SQL_ERROR_OK_MACRO ((SqlError){.type=SQL_ERROR_OK})
+#define RETURN_IF_ERR(E) do { \
+    SqlError ERR_RESULT = (E); \
+    if (ERR_RESULT.type != SQL_ERROR_OK) return ERR_RESULT; \
+} while (0) // Ending in while (0) means you can do RETURN_IF_ERR(..); cleanly
 
 ////
 // Error functions
