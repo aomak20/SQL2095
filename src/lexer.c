@@ -109,21 +109,18 @@ static SqlError process_left_arrow(Scanner* s) {
     char next_char = scanner_peek(s);
     switch (next_char) {
         case '>':   // <>
-            result = lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_NE,
-                temp, 2, line, col);
-            if (result.type != SQL_ERROR_OK) return result;
+            RETURN_IF_ERR(lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_NE,
+                temp, 2, line, col));
             scanner_advance(s);
             break;
         case '=':   // <=
-            result = lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_LTE,
-                temp, 2, line, col);
-            if (result.type != SQL_ERROR_OK) return result;
+            RETURN_IF_ERR(lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_LTE,
+                temp, 2, line, col));
             scanner_advance(s);
             break;
         default:    // <
-            result = lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_LT,
-                temp, 1, line, col);
-            if (result.type != SQL_ERROR_OK) return result;
+            RETURN_IF_ERR(lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_LT,
+                temp, 1, line, col));
             // Next char was not part of < token, so don't advance
     }
 
@@ -141,15 +138,13 @@ static SqlError process_right_arrow(Scanner* s) {
     char next_char = scanner_peek(s);
     switch (next_char) {
         case '=':   // >=
-            result = lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_GTE,
-                temp, 2, line, col);
-            if (result.type != SQL_ERROR_OK) return result;
+            RETURN_IF_ERR(lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_GTE,
+                temp, 2, line, col));
             scanner_advance(s);
             break;
         default:    // >
-            result = lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_GT,
-                temp, 1, line, col);
-            if (result.type != SQL_ERROR_OK) return result;
+            RETURN_IF_ERR(lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_GT,
+                temp, 1, line, col));
             // Next char was not part of > token, so don't advance
     }
 
@@ -191,9 +186,8 @@ static SqlError process_quoted_string(Scanner* s) {
         }
         next_char = scanner_peek(s);
     }
-    result = lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_STRING_LITERAL,
-        temp, len, line, col);
-    if (result.type != SQL_ERROR_OK) return result;
+    RETURN_IF_ERR(lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_STRING_LITERAL,
+        temp, len, line, col));
     scanner_advance(s);
 
     return SQL_ERROR_OK_MACRO;
@@ -231,9 +225,8 @@ static SqlError process_id_keyword(Scanner* s) {
     // Determine if this token matches a keyword (case-insensitive), otherwise
     // it's an identifier
     TokenType type = check_keyword_match(temp, len);
-    result = lexer_append_token_array_arg(&s->tokens, type,
-        temp, len, line, col);
-    if (result.type != SQL_ERROR_OK) return result;
+    RETURN_IF_ERR(lexer_append_token_array_arg(&s->tokens, type,
+        temp, len, line, col));
 
     return SQL_ERROR_OK_MACRO;
 }
@@ -283,9 +276,8 @@ static SqlError process_number(Scanner* s) {
         return result;
     }
 
-    result = lexer_append_token_array_arg(&s->tokens, type,
-        temp, len, line, col);
-    if (result.type != SQL_ERROR_OK) return result;
+    RETURN_IF_ERR(lexer_append_token_array_arg(&s->tokens, type,
+        temp, len, line, col));
     
     return SQL_ERROR_OK_MACRO;
 }
@@ -313,89 +305,75 @@ SqlError lexer_tokenize(const char* data, size_t len, TokenArray* out_arr) {
         switch (c) {
             // Single-character tokens which can't be scanned further
             case '(':
-                result = lexer_append_token_array_arg(&scanner.tokens,
+                RETURN_IF_ERR(lexer_append_token_array_arg(&scanner.tokens,
                     TOKEN_TYPE_LPAREN, scanner.data + scanner.pos, 1,
-                    scanner.line, scanner.column);
-                if (result.type != SQL_ERROR_OK) return result;
+                    scanner.line, scanner.column));
                 scanner_advance(&scanner);
                 break;
             case ')':
-                result = lexer_append_token_array_arg(&scanner.tokens,
+                RETURN_IF_ERR(lexer_append_token_array_arg(&scanner.tokens,
                     TOKEN_TYPE_RPAREN, scanner.data + scanner.pos, 1,
-                    scanner.line, scanner.column);
-                if (result.type != SQL_ERROR_OK) return result;
+                    scanner.line, scanner.column));
                 scanner_advance(&scanner);
                 break;
             case ',':
-                result = lexer_append_token_array_arg(&scanner.tokens,
+                RETURN_IF_ERR(lexer_append_token_array_arg(&scanner.tokens,
                     TOKEN_TYPE_COMMA, scanner.data + scanner.pos, 1,
-                    scanner.line, scanner.column);
-                if (result.type != SQL_ERROR_OK) return result;
+                    scanner.line, scanner.column));
                 scanner_advance(&scanner);
                 break;
             case ';':
-                result = lexer_append_token_array_arg(&scanner.tokens,
+                RETURN_IF_ERR(lexer_append_token_array_arg(&scanner.tokens,
                     TOKEN_TYPE_SEMICOLON, scanner.data + scanner.pos, 1,
-                    scanner.line, scanner.column);
-                if (result.type != SQL_ERROR_OK) return result;
+                    scanner.line, scanner.column));
                 scanner_advance(&scanner);
                 break;
             case '*':
-                result = lexer_append_token_array_arg(&scanner.tokens,
+                RETURN_IF_ERR(lexer_append_token_array_arg(&scanner.tokens,
                     TOKEN_TYPE_STAR, scanner.data + scanner.pos, 1,
-                    scanner.line, scanner.column);
-                if (result.type != SQL_ERROR_OK) return result;
+                    scanner.line, scanner.column));
                 scanner_advance(&scanner);
                 break;
             case '+':
-                result = lexer_append_token_array_arg(&scanner.tokens,
+                RETURN_IF_ERR(lexer_append_token_array_arg(&scanner.tokens,
                     TOKEN_TYPE_PLUS, scanner.data + scanner.pos, 1,
-                    scanner.line, scanner.column);
-                if (result.type != SQL_ERROR_OK) return result;
+                    scanner.line, scanner.column));
                 scanner_advance(&scanner);
                 break;
             case '-':
-                result = lexer_append_token_array_arg(&scanner.tokens,
+                RETURN_IF_ERR(lexer_append_token_array_arg(&scanner.tokens,
                     TOKEN_TYPE_MINUS, scanner.data + scanner.pos, 1,
-                    scanner.line, scanner.column);
-                if (result.type != SQL_ERROR_OK) return result;
+                    scanner.line, scanner.column));
                 scanner_advance(&scanner);
                 break;
             case '/':
-                result = lexer_append_token_array_arg(&scanner.tokens,
+                RETURN_IF_ERR(lexer_append_token_array_arg(&scanner.tokens,
                     TOKEN_TYPE_SLASH, scanner.data + scanner.pos, 1,
-                    scanner.line, scanner.column);
-                if (result.type != SQL_ERROR_OK) return result;
+                    scanner.line, scanner.column));
                 scanner_advance(&scanner);
                 break;
             case '=':
-                result = lexer_append_token_array_arg(&scanner.tokens,
+                RETURN_IF_ERR(lexer_append_token_array_arg(&scanner.tokens,
                     TOKEN_TYPE_EQ, scanner.data + scanner.pos, 1,
-                    scanner.line, scanner.column);
-                if (result.type != SQL_ERROR_OK) return result;
+                    scanner.line, scanner.column));
                 scanner_advance(&scanner);
                 break;
             case '<':
-                result = process_left_arrow(&scanner);
-                if (result.type != SQL_ERROR_OK) return result;
+                RETURN_IF_ERR(process_left_arrow(&scanner));
                 break;
             case '>':
-                result = process_right_arrow(&scanner);
-                if (result.type != SQL_ERROR_OK) return result;
+                RETURN_IF_ERR(process_right_arrow(&scanner));
                 break;
             case '"':
-                result = process_quoted_string(&scanner);
-                if (result.type != SQL_ERROR_OK) return result;
+                RETURN_IF_ERR(process_quoted_string(&scanner));
                 break;
             default:
                 if (isspace(c)) {
                     scanner_advance(&scanner);
                 } else if (isalpha(c)) {
-                    result = process_id_keyword(&scanner);
-                    if (result.type != SQL_ERROR_OK) return result;
+                    RETURN_IF_ERR(process_id_keyword(&scanner));
                 } else if (isdigit(c)) {
-                    result = process_number(&scanner);
-                    if (result.type != SQL_ERROR_OK) return result;
+                    RETURN_IF_ERR(process_number(&scanner));
                 } else {
                     result = (SqlError) {
                         .type = SQL_ERROR_LEXICAL,
@@ -411,9 +389,8 @@ SqlError lexer_tokenize(const char* data, size_t len, TokenArray* out_arr) {
         }
     }
 
-    result = lexer_append_token_array_arg(out_arr, TOKEN_TYPE_EOF,
-        scanner.data + scanner.pos, 0, scanner.line, scanner.column);
-    if (result.type != SQL_ERROR_OK) return result;
+    RETURN_IF_ERR(lexer_append_token_array_arg(out_arr, TOKEN_TYPE_EOF,
+        scanner.data + scanner.pos, 0, scanner.line, scanner.column));
     *out_arr = scanner.tokens;
     return SQL_ERROR_OK_MACRO;
 }
@@ -459,8 +436,7 @@ SqlError lexer_free_token_array(TokenArray* arr) {
 }
 
 SqlError lexer_append_token_array_tok(TokenArray* arr, const Token token) {
-    SqlError result = lexer_grow_token_array(arr);
-    if (result.type != SQL_ERROR_OK) return result;
+    RETURN_IF_ERR(lexer_grow_token_array(arr));
     arr->start[arr->count] = token;
     arr->count++;
     return SQL_ERROR_OK_MACRO;
@@ -469,8 +445,7 @@ SqlError lexer_append_token_array_tok(TokenArray* arr, const Token token) {
 SqlError lexer_append_token_array_arg(TokenArray* arr, TokenType type,
     const char* start, size_t length, size_t line, size_t column
 ) {
-    SqlError result = lexer_grow_token_array(arr);
-    if (result.type != SQL_ERROR_OK) return result;
+    RETURN_IF_ERR(lexer_grow_token_array(arr));
     Token token = {
         .type = type,
         .start = start,
