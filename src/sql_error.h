@@ -19,6 +19,7 @@ typedef enum SqlErrorType {
     SQL_ERROR_SYNTAX,
     SQL_ERROR_SEMANTIC,
     SQL_ERROR_RUNTIME,
+    SQL_ERROR_INTERNAL,
     SQL_ERROR_GENERIC
 } SqlErrorType;
 

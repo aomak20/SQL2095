@@ -420,7 +420,7 @@ SqlError lexer_grow_token_array(TokenArray* arr) {
         return SQL_ERROR_OK_MACRO;
     } else {
         return (SqlError) {
-            .type = SQL_ERROR_RUNTIME,
+            .type = SQL_ERROR_INTERNAL,
             .line = 0,
             .column = 0,
             .message = "Failed to allocate memory"
