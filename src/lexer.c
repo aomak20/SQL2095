@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "lexer.h"
+#include "sql_error.h"
 
 // Constants
 const char* TOKEN_TYPE_STR[] = {

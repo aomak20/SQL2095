@@ -6,6 +6,7 @@
 #define LEXER_H
 
 #include <stddef.h>
+#include "sql_error.h"
 
 ////
 // Token definitions
