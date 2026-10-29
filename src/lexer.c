@@ -459,15 +459,15 @@ SqlError lexer_append_token_array_arg(TokenArray* arr, TokenType type,
 }
 
 void lexer_print_token(const Token* token) {
-    printf("Type: %s\n", TOKEN_TYPE_STR[token->type]);
-    printf("Data: \"%.*s\"\n", (int)token->length, token->start);
-    printf("Line, column: %zu, %zu\n", token->line, token->column);
+    printf("%s | %zu:%zu\n", TOKEN_TYPE_STR[token->type],
+        token->line, token->column);
+    printf("\"%.*s\"\n", (int)token->length, token->start);
 }
 
 void lexer_print_token_array(const TokenArray* arr) {
     printf("Token count: %zu\n\n", arr->count);
     for (size_t i = 0; i < arr->count; ++i) {
-        printf("%zu\n", i);
+        printf("%zu | ", i);
         lexer_print_token(&arr->start[i]);
         printf("\n");
     }
