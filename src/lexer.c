@@ -100,7 +100,6 @@ static void scanner_advance(Scanner* s) {
 
 // Process a '<' with scanner
 static SqlError process_left_arrow(Scanner* s) {
-    SqlError result;
     const char* temp = s->data + s->pos;    // Start of token pointer
     size_t line = s->line;
     size_t col = s->column;
@@ -129,7 +128,6 @@ static SqlError process_left_arrow(Scanner* s) {
 
 // Process a '>' with scanner
 static SqlError process_right_arrow(Scanner* s) {
-    SqlError result;
     const char* temp = s->data + s->pos;    // Start of token pointer
     size_t line = s->line;
     size_t col = s->column;
@@ -413,7 +411,11 @@ SqlError lexer_grow_token_array(TokenArray* arr) {
         arr->start = malloc(sizeof(Token) * arr->capacity);
     } else if (arr->count == arr->capacity) {
         arr->capacity *= 2;
-        arr->start = realloc(arr->start, sizeof(Token) * arr->capacity);
+        char* temp = realloc(arr->start, sizeof(Token) * arr->capacity);
+        if (temp == NULL) {
+            free(arr->start);
+            arr->start = NULL;
+        }
     }
 
     if (arr->start != NULL) {
