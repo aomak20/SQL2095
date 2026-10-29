@@ -96,7 +96,7 @@ typedef struct {
 // points to a heap allocated array of Token structs.
 // NOTE: Remember to free the TokenArray after you're done with it using
 // `lexer_free_token_array`.
-TokenArray lexer_tokenize(const char* data, size_t len);
+SqlError lexer_tokenize(const char* data, size_t len, TokenArray* out_arr);
 
 ////
 // TokenArray helpers
@@ -106,15 +106,15 @@ TokenArray lexer_tokenize(const char* data, size_t len);
 TokenArray lexer_new_token_array();
 
 // Check count of a TokenArray and grow if needed.
-void lexer_grow_token_array(TokenArray* arr);
+SqlError lexer_grow_token_array(TokenArray* arr);
 
 // Free the heap allocation under a TokenArray.
-void lexer_free_token_array(TokenArray* arr);
+SqlError lexer_free_token_array(TokenArray* arr);
 
 // Append a Token to a TokenArray, growing if needed.
-void lexer_append_token_array_tok(TokenArray* arr, const Token token);
+SqlError lexer_append_token_array_tok(TokenArray* arr, const Token token);
 // Append a new Token to a TokenArray based on given args, growing if needed.
-void lexer_append_token_array_arg(TokenArray* arr, TokenType type,
+SqlError lexer_append_token_array_arg(TokenArray* arr, TokenType type,
     const char* start, size_t length, size_t line, size_t column);
 
 // Print a Token struct's info.

@@ -2,10 +2,11 @@
 // Author:      Andrei M
 // Description: TODO
 
+#include <stdio.h>
 #include "sql_error.h"
 
 // Error type strings
-const char* ERROR_TYPE_STR[] = {
+const char* SQL_ERROR_TYPE_STR[] = {
     "",                 // SQL_ERROR_OK
     "Lexical error",    // SQL_ERROR_LEXICAL
     "Syntax error",     // SQL_ERROR_SYNTAX
@@ -16,7 +17,10 @@ const char* ERROR_TYPE_STR[] = {
 
 
 // Error functions
-void print_error_info(Error* e) {
-    printf("%s at %zu:%zu: %s\n",
-        ERROR_TYPE_STR[e->type], e->line, e->column, e->message);
+void print_error_info(const SqlError* e) {
+    if (e->type == SQL_ERROR_OK) return;
+    printf("%s", SQL_ERROR_TYPE_STR[e->type]);
+    if (e->line > 0 || e->column > 0)
+        printf(" at %zu:%zu", e->line, e->column);
+    printf(": %s\n", e->message);
 }

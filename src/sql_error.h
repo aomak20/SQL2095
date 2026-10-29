@@ -13,32 +13,35 @@
 
 // Error types
 // NOTE: Since ERROR_OK = 0, `if (error_type)` returns true on error, else false
-typedef enum ErrorType {
+typedef enum SqlErrorType {
     SQL_ERROR_OK = 0,
     SQL_ERROR_LEXICAL,
     SQL_ERROR_SYNTAX,
     SQL_ERROR_SEMANTIC,
     SQL_ERROR_RUNTIME,
     SQL_ERROR_GENERIC
-} ErrorType;
+} SqlErrorType;
 
 // List of strings representing error types. I'd use Xmacros like for token
 // type but I want the strings to be formatted naturally, not LIKE_THIS.
-extern const char* ERROR_TYPE_STR[];
+extern const char* SQL_ERROR_TYPE_STR[];
 
 // Error result
-typedef struct Error {
-    ErrorType type;
+typedef struct SqlError {
+    SqlErrorType type;
     size_t line;
     size_t column;
     char message[256];
-} Error;
+} SqlError;
+
+// Useful macros
+#define SQL_ERROR_OK_MACRO ((SqlError){.type=SQL_ERROR_OK})
 
 ////
 // Error functions
 ////
 
 // Print an error's info.
-void print_error_info(Error* e);
+void print_error_info(const SqlError* e);
 
 #endif//SQL_ERROR_H
