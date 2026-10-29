@@ -100,6 +100,7 @@ static void scanner_advance(Scanner* s) {
 
 // Process a '<' with scanner
 static SqlError process_left_arrow(Scanner* s) {
+    SqlError result;
     const char* temp = s->data + s->pos;    // Start of token pointer
     size_t line = s->line;
     size_t col = s->column;
@@ -108,19 +109,22 @@ static SqlError process_left_arrow(Scanner* s) {
     char next_char = scanner_peek(s);
     switch (next_char) {
         case '>':   // <>
-            lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_NE,
+            result = lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_NE,
                 temp, 2, line, col);
+            if (result.type != SQL_ERROR_OK) return result;
             scanner_advance(s);
             break;
         case '=':   // <=
-            lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_LTE,
+            result = lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_LTE,
                 temp, 2, line, col);
+            if (result.type != SQL_ERROR_OK) return result;
             scanner_advance(s);
             break;
         default:    // <
-            lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_LT,
+            result = lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_LT,
                 temp, 1, line, col);
-            scanner_advance(s);
+            if (result.type != SQL_ERROR_OK) return result;
+            // Next char was not part of < token, so don't advance
     }
 
     return SQL_ERROR_OK_MACRO;
@@ -128,7 +132,7 @@ static SqlError process_left_arrow(Scanner* s) {
 
 // Process a '>' with scanner
 static SqlError process_right_arrow(Scanner* s) {
-    // TODO process > to get either > or >= token
+    SqlError result;
     const char* temp = s->data + s->pos;    // Start of token pointer
     size_t line = s->line;
     size_t col = s->column;
@@ -137,14 +141,16 @@ static SqlError process_right_arrow(Scanner* s) {
     char next_char = scanner_peek(s);
     switch (next_char) {
         case '=':   // >=
-            lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_GTE,
+            result = lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_GTE,
                 temp, 2, line, col);
+            if (result.type != SQL_ERROR_OK) return result;
             scanner_advance(s);
             break;
         default:    // >
-            lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_GT,
+            result = lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_GT,
                 temp, 1, line, col);
-            scanner_advance(s);
+            if (result.type != SQL_ERROR_OK) return result;
+            // Next char was not part of > token, so don't advance
     }
 
     return SQL_ERROR_OK_MACRO;
@@ -152,6 +158,7 @@ static SqlError process_right_arrow(Scanner* s) {
 
 // Process a '"' with scanner
 static SqlError process_quoted_string(Scanner* s) {
+    SqlError result;
     // Line and column will point to start of string, including double quotes,
     // but the actual token will just store the string itself without quotes.
     size_t line = s->line;
@@ -160,20 +167,33 @@ static SqlError process_quoted_string(Scanner* s) {
     const char* temp = s->data + s->pos;    // Start of token pointer
     size_t len = 0;                         // Track length of quoted string
 
-    while (scanner_peek(s) != '"') {
-        if (isalnum(scanner_peek(s))) {
+    char next_char = scanner_peek(s);
+    while (next_char != '"') {
+        if (isalnum(next_char) || ispunct(next_char) || isspace(next_char)) {
+            // Allow alphanum, punctuation, and whitespace in strings. This is
+            // a somewhat arbitrary restriction which I may change later.
             scanner_advance(s);
             len++;
+        } else if (next_char == '\0') {
+            // scanner_peek returns null-byte at end of input
+            result = (SqlError) {
+                .type=SQL_ERROR_LEXICAL, .line=line, .column=col,
+                .message="Quoted string was not closed" };
+            return result;
         } else {
-            // TODO handle a non-alphanumeric or EOF inside string literal.
-            // This is an arbitrary restriction, figure out what I want to do
-            // about it later.
-            scanner_advance(s);
-            len++;
+            result = (SqlError) {
+                .type=SQL_ERROR_LEXICAL, .line=s->line, .column=s->column };
+            // Cast to char* here because the length of string is known
+            // to be under the max length of result.message
+            sprintf((char*)&result.message,
+                "Unrecognized character '%c' in quoted string", next_char);
+            return result;
         }
+        next_char = scanner_peek(s);
     }
-    lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_STRING_LITERAL,
+    result = lexer_append_token_array_arg(&s->tokens, TOKEN_TYPE_STRING_LITERAL,
         temp, len, line, col);
+    if (result.type != SQL_ERROR_OK) return result;
     scanner_advance(s);
 
     return SQL_ERROR_OK_MACRO;
@@ -181,30 +201,46 @@ static SqlError process_quoted_string(Scanner* s) {
 
 // Process a letter with scanner
 static SqlError process_id_keyword(Scanner* s) {
+    SqlError result;
     const char* temp = s->data + s->pos;    // Start of token pointer
     size_t line = s->line;
     size_t col = s->column;
     size_t len = 0;                         // Track length of id/keyword
 
-    while (!isspace(scanner_peek(s))) {
-        // TODO currently this allows any non-whitespace char in an identifier,
-        // figure this out later and add check & error handling if needed
-        scanner_advance(s);
-        len++;
+    char next_char = scanner_peek(s);
+    while (true) {
+        if (isalnum(next_char)) {
+            // Allow only alphanumerics in identifiers
+            scanner_advance(s);
+            len++;
+        } else if (isspace(next_char) || next_char == '\0') {
+            // Whitespace or EOF ends the identifier
+            break;
+        } else {
+            result = (SqlError) {
+                .type=SQL_ERROR_LEXICAL, .line=s->line, .column=s->column };
+            // Cast to char* here because the length of string is known
+            // to be under the max length of result.message
+            sprintf((char*)&result.message,
+                "Unrecognized character '%c' in identifier/keyword", next_char);
+            return result;
+        }
+        next_char = scanner_peek(s);
     }
 
     // Determine if this token matches a keyword (case-insensitive), otherwise
     // it's an identifier
     TokenType type = check_keyword_match(temp, len);
-    lexer_append_token_array_arg(&s->tokens, type,
+    result = lexer_append_token_array_arg(&s->tokens, type,
         temp, len, line, col);
+    if (result.type != SQL_ERROR_OK) return result;
 
     return SQL_ERROR_OK_MACRO;
 }
 
 // Process a digit with scanner
 static SqlError process_number(Scanner* s) {
-    // TODO process to get a int or float literal token
+    SqlError result;
     const char* temp = s->data + s->pos;    // Start of token pointer
     size_t line = s->line;
     size_t col = s->column;
@@ -219,9 +255,12 @@ static SqlError process_number(Scanner* s) {
             len++;
         } else if (next_char == '.') {
             if (found_period) {
-                // TODO handle error, multiple periods in number
-                scanner_advance(s);
-                len++;
+                // If we find another period before any non-digit character,
+                // there's a nigh 100% chance the number is malformed.
+                result = (SqlError) {
+                    .type=SQL_ERROR_LEXICAL, .line=s->line, .column=s->column,
+                    .message="Float literals can't have more than one period" };
+                return result;
             } else {
                 found_period = true;
                 type = TOKEN_TYPE_FLOAT_LITERAL;
@@ -229,19 +268,24 @@ static SqlError process_number(Scanner* s) {
                 len++;
             }
         } else {
-            // TODO could put a check here to make sure number is followed by
-            // whitespace, not sure if that's what I wanna do yet
+            // TODO this currently allows any char to signal the end of a num,
+            // allowing legal syntax like "123abc" or "4.56;". Figure out if I
+            // want to put any further restrictions on this later.
             break;
         }
     }
 
     // Make sure float didn't end with a period
     if (temp[len-1] == '.') {
-        // TODO handle error for float ending with '.'
+        result = (SqlError) {
+            .type=SQL_ERROR_LEXICAL, .line=s->line, .column=s->column,
+            .message="Float can't end with a trailing period" };
+        return result;
     }
 
-    lexer_append_token_array_arg(&s->tokens, type,
+    result = lexer_append_token_array_arg(&s->tokens, type,
         temp, len, line, col);
+    if (result.type != SQL_ERROR_OK) return result;
     
     return SQL_ERROR_OK_MACRO;
 }
@@ -367,6 +411,9 @@ SqlError lexer_tokenize(const char* data, size_t len, TokenArray* out_arr) {
         }
     }
 
+    result = lexer_append_token_array_arg(out_arr, TOKEN_TYPE_EOF,
+        scanner.data + scanner.pos, 0, scanner.line, scanner.column);
+    if (result.type != SQL_ERROR_OK) return result;
     *out_arr = scanner.tokens;
     return SQL_ERROR_OK_MACRO;
 }
