@@ -25,6 +25,10 @@ typedef struct {
 static const Keyword keywords[] = {
     {"CREATE",  TOKEN_TYPE_CREATE},
     {"DROP",    TOKEN_TYPE_DROP},
+    {"ALTER",   TOKEN_TYPE_ALTER},
+    {"ADD",     TOKEN_TYPE_ADD},
+    {"RENAME",  TOKEN_TYPE_RENAME},
+    {"TO",      TOKEN_TYPE_TO},
     {"TABLE",   TOKEN_TYPE_TABLE},
     {"SELECT",  TOKEN_TYPE_SELECT},
     {"INSERT",  TOKEN_TYPE_INSERT},
@@ -37,6 +41,7 @@ static const Keyword keywords[] = {
     {"WHERE",   TOKEN_TYPE_WHERE},
     {"PRIMARY", TOKEN_TYPE_PRIMARY},
     {"KEY",     TOKEN_TYPE_KEY},
+    {"DEFAULT", TOKEN_TYPE_DEFAULT},
     {"NOT",     TOKEN_TYPE_NOT},
     {"NULL",    TOKEN_TYPE_NULL},
     {"INT",     TOKEN_TYPE_INT_TYPE},
@@ -47,7 +52,8 @@ static const Keyword keywords[] = {
     {"TRUE",    TOKEN_TYPE_TRUE},
     {"FALSE",   TOKEN_TYPE_FALSE},
     {"AND",     TOKEN_TYPE_AND},
-    {"OR",      TOKEN_TYPE_OR}
+    {"OR",      TOKEN_TYPE_OR},
+    {"IS",      TOKEN_TYPE_IS}
 };
 
 // Scanner struct to keep track of state, pass between functions
