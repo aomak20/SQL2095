@@ -1,8 +1,15 @@
 SRC_DIR = src
 BUILD_DIR = build
 
+DEBUG ?= 0
+
 CC ?= cc
 CFLAGS ?= -Wall -Wextra -I$(SRC_DIR)
+
+ifeq ($(DEBUG), 1)
+    CFLAGS += -g -DDEBUG
+    CFLAGS := $(filter-out -O2, $(CFLAGS))
+endif
 
 LEXER_TEST_SOURCES = testing/lexer_test.c \
 	$(SRC_DIR)/lexer.c \

@@ -2,6 +2,7 @@
 // Author:      Andrei M
 // Description: TODO
 
+#include <stdlib.h>
 #include "parser.h"
 #include "lexer.h"
 #include "sql_error.h"
@@ -57,7 +58,8 @@ void free_program(ProgramNode* program) {
         s = temp;
     }
 
-    free(program);
+    // Don't free(program) since the lifetime and allocation of `program`
+    // should be handled by the caller
 }
 
 void free_statement(StatementNode* stmt) {
