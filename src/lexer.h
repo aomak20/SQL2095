@@ -77,7 +77,7 @@ typedef enum TokenType {
 extern const char* TOKEN_TYPE_STR[];
 
 // Individual token
-typedef struct {
+typedef struct Token {
     TokenType type;
     const char *start;  // Points at source in-mem
     size_t length;
@@ -88,7 +88,7 @@ typedef struct {
 // Dynamically allocated token array, gets returned by main tokenize function.
 // `start` is a pointer to heap allocation, `count` is number of tokens,
 // `capacity` is max number of tokens.
-typedef struct {
+typedef struct TokenArray {
     Token* start;
     size_t count;
     size_t capacity;
