@@ -393,7 +393,7 @@ SqlError lexer_tokenize(const char* data, size_t len, TokenArray* out_arr) {
         }
     }
 
-    RETURN_IF_ERR(lexer_append_token_array_arg(out_arr, TOKEN_TYPE_EOF,
+    RETURN_IF_ERR(lexer_append_token_array_arg(&scanner.tokens, TOKEN_TYPE_EOF,
         scanner.data + scanner.pos, 0, scanner.line, scanner.column));
     *out_arr = scanner.tokens;
     return SQL_ERROR_OK_MACRO;
