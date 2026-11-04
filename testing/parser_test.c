@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
         goto lexer_cleanup;
     }
 
-    ProgramNode program;
+    ProgramNode program = {0};
     result = parser_generate(&tokens, &program);
     if (result.type != SQL_ERROR_OK) {
         print_error_info(&result);

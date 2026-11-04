@@ -89,6 +89,7 @@ static SqlError parse_program(Parser* p, ProgramNode* out_node) {
                 .column = 0,
                 .message = "Failed to allocate memory"
             };
+        *new_node = (StatementNode){0};
         result = parse_statement(p, new_node);
         if (result.type != SQL_ERROR_OK) {
             free(new_node);
@@ -114,6 +115,7 @@ static SqlError parse_program(Parser* p, ProgramNode* out_node) {
 // Parser API
 
 SqlError parser_generate(const TokenArray* tokens, ProgramNode* out_tree) {
+    out_tree->first_stmt = NULL;
     Parser parser = { .tokens=tokens, .index=0 };
     RETURN_IF_ERR(parse_program(&parser, out_tree));
     return SQL_ERROR_OK_MACRO;
@@ -123,7 +125,6 @@ SqlError parser_generate(const TokenArray* tokens, ProgramNode* out_tree) {
 // Destructor functions for AST nodes
 
 void free_program(ProgramNode* program) {
-    // TODO seems to be some memory leak, investigate
     if (program == NULL) return;
 
     StatementNode* s = program->first_stmt;
@@ -132,9 +133,7 @@ void free_program(ProgramNode* program) {
         free_statement(s);
         s = temp;
     }
-
-    // Don't free(program) since the lifetime and allocation of `program`
-    // should be handled by the caller
+    program->first_stmt = NULL;
 }
 
 void free_statement(StatementNode* stmt) {
