@@ -11,6 +11,7 @@ const char* SQL_ERROR_TYPE_STR[] = {
     "Lexical error",    // SQL_ERROR_LEXICAL
     "Syntax error",     // SQL_ERROR_SYNTAX
     "Semantic error",   // SQL_ERROR_SEMANTIC
+    "Database error",   // SQL_ERROR_DATABASE
     "Runtime error",    // SQL_ERROR_RUNTIME
     "Internal error",   // SQL_ERROR_INTERNAL
     "Error"             // SQL_ERROR_GENERIC
