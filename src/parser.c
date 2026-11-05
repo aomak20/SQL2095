@@ -69,7 +69,7 @@ static SqlError parse_statement(Parser* p, StatementNode* out_node) {
 static SqlError parse_program(Parser* p, ProgramNode* out_node) {
     SqlError result;
     Token* curr_token = parser_peek(p);
-    if (curr_token == NULL) 
+    if (curr_token == NULL)
         return (SqlError) {
             .type = SQL_ERROR_INTERNAL,
             .line = 0,
@@ -115,10 +115,23 @@ static SqlError parse_program(Parser* p, ProgramNode* out_node) {
 // Parser API
 
 SqlError parser_generate(const TokenArray* tokens, ProgramNode* out_tree) {
-    out_tree->first_stmt = NULL;
+    ProgramNode node = parser_new_program_node();
     Parser parser = { .tokens=tokens, .index=0 };
-    RETURN_IF_ERR(parse_program(&parser, out_tree));
+    SqlError result = parse_program(&parser, &node);
+    if (result.type != SQL_ERROR_OK) {
+        free_program(&node);
+    }
+    *out_tree = node;
     return SQL_ERROR_OK_MACRO;
+}
+
+
+// AST Helpers
+ProgramNode parser_new_program_node() {
+    ProgramNode node = {
+        .first_stmt = NULL
+    };
+    return node;
 }
 
 

@@ -38,7 +38,14 @@ void free_program(ProgramNode* program);
 
 // Main parser function. Generates an AST based on an input list of tokens.
 // Initializes `out_tree` and generates an AST from the input tokens. If this
-// function fails, it is up to the caller to call free_program() on `out_tree`.
+// function fails, cleanup is automatic and `out_tree` remains uninitialized.
 SqlError parser_generate(const TokenArray* tokens, ProgramNode* out_tree);
+
+////
+// AST Helpers
+////
+
+// Create an empty ProgramNode.
+ProgramNode parser_new_program_node();
 
 #endif//PARSER_H
