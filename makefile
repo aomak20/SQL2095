@@ -20,6 +20,7 @@ lexer_test: $(LEXER_TEST_SOURCES)
 	$(CC) $(CFLAGS) $(LEXER_TEST_SOURCES) -o $(BUILD_DIR)/$@
 
 PARSER_TEST_SOURCES = testing/parser_test.c \
+	$(SRC_DIR)/ast.c \
 	$(SRC_DIR)/parser.c \
 	$(SRC_DIR)/lexer.c \
 	$(SRC_DIR)/sql_error.c 
