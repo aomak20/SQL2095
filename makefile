@@ -29,7 +29,14 @@ parser_test: $(PARSER_TEST_SOURCES)
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(PARSER_TEST_SOURCES) -o $(BUILD_DIR)/$@
 
-.PHONY: all clean lexer_test parser_test
-all: lexer_test parser_test
+DB_TEST_SOURCES = testing/db_test.c \
+	$(SRC_DIR)/database.c
+
+db_test: $(DB_TEST_SOURCES)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(DB_TEST_SOURCES) -o $(BUILD_DIR)/$@
+
+.PHONY: all clean lexer_test parser_test db_test
+all: lexer_test parser_test db_test
 clean:
 	@rm -rf build/
